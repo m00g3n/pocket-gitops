@@ -1,52 +1,4 @@
 ---
-# memcached deployment used by Flux to cache
-# container image metadata.
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: memcached
-  namespace: flux
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: memcached
-  template:
-    metadata:
-      labels:
-        name: memcached
-    spec:
-      nodeSelector:
-        beta.kubernetes.io/os: linux
-      containers:
-      - name: memcached
-        image: memcached:1.5.20
-        imagePullPolicy: IfNotPresent
-        args:
-        - -m 512   # Maximum memory to use, in megabytes
-        - -I 5m    # Maximum size for one item
-        - -p 11211 # Default port
-        # - -vv    # Uncomment to get logs of each request and response.
-        ports:
-        - name: clients
-          containerPort: 11211
-        securityContext:
-          runAsUser: 11211
-          runAsGroup: 11211
-          allowPrivilegeEscalation: false
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: memcached
-  namespace: flux
-spec:
-  ports:
-    - name: memcached
-      port: 11211
-  selector:
-    name: memcached
----
 # The service account, cluster roles, and cluster role binding are
 # only needed for Kubernetes with role-based access control (RBAC).
 apiVersion: v1
@@ -125,9 +77,9 @@ spec:
       # repo rather than using github or the like. You'll also need to
       # mount it into the container, below. See
       # https://docs.fluxcd.io/en/latest/guides/use-private-git-host
-      - name: ssh-config
-        configMap:
-          name: flux-ssh-config
+      # - name: ssh-config
+      #   configMap:
+      #     name: flux-ssh-config
 
       # The following volume is for using a customised .kube/config,
       # which you will need to do if you wish to have a different
@@ -181,8 +133,8 @@ spec:
 
         # Include this if you need to mount a customised known_hosts
         # file; you'll also need the volume declared above.
-        - name: ssh-config
-          mountPath: /root/.ssh
+        # - name: ssh-config
+        #   mountPath: /root/.ssh
 
         # Include this and the volume "kubeconfig" above, and the
         # environment entry "KUBECONFIG" below, to override the config
@@ -232,7 +184,7 @@ spec:
         - --git-branch=master
         # Include this if you want to restrict the manifests considered by flux
         # to those under the following relative paths in the git repository
-        - --git-path=infrastructure
+        # - --git-path=subdir1,subdir2
         - --git-label=flux
         - --git-user=admin123
         - --git-email=me@test.you
@@ -276,3 +228,51 @@ metadata:
   name: flux-git-deploy
   namespace: flux
 type: Opaque
+---
+# memcached deployment used by Flux to cache
+# container image metadata.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memcached
+  namespace: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: memcached
+  template:
+    metadata:
+      labels:
+        name: memcached
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      containers:
+      - name: memcached
+        image: memcached:1.5.20
+        imagePullPolicy: IfNotPresent
+        args:
+        - -m 512   # Maximum memory to use, in megabytes
+        - -I 5m    # Maximum size for one item
+        - -p 11211 # Default port
+        # - -vv    # Uncomment to get logs of each request and response.
+        ports:
+        - name: clients
+          containerPort: 11211
+        securityContext:
+          runAsUser: 11211
+          runAsGroup: 11211
+          allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached
+  namespace: flux
+spec:
+  ports:
+    - name: memcached
+      port: 11211
+  selector:
+    name: memcached

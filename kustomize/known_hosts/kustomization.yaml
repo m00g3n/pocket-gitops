@@ -1,0 +1,5 @@
+bases:
+  - ../base
+
+patches:
+  - known_hosts.yaml
