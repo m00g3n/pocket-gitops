@@ -2,6 +2,7 @@ version: "3"
 
 networks:
   hyc-demo:
+    name: hyc-demo
     driver: bridge
 
 services:
@@ -47,6 +48,7 @@ services:
       - hyc-demo
     volumes:
       - k3s-server:/var/lib/rancher/k3s
+      - ./registries.yaml:/etc/rancher/k3s/registries.yaml
       # This is just so that we get the kubeconfig file out
       - .:/output
     ports:

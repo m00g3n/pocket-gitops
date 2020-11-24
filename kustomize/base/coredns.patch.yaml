@@ -7,12 +7,12 @@ data:
   Corefile: |
     gitea:53 {
         hosts {
-           __GITEA_IP_ADDRESS__ gitea
+           192.168.128.3 gitea
         }
     }
     registry:53 {
         hosts {
-            __REGISTRY_IP_ADDRESS__ registry
+            192.168.128.2 registry
         }
     }
     .:53 {
