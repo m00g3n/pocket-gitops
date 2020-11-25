@@ -49,6 +49,7 @@ generate: generate-coredns-patch generate-flux-ssh-config generate-flux;
 
 apply-k3s: generate
 	kubectl apply -k ${K3S}
+	kubectl -n flux rollout status deployment/flux
 
 clean:
 	rm -f ${COREDNS_PATCH_YAML} ${FLUX_SSH_CONFIG_YAML} ${FLUX_YAML}
