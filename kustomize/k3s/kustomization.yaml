@@ -1,9 +1,6 @@
 bases:
   - ../base
 
-patches:
-  - flux-ssh-config-patch.yaml
-
 patchesJson6902:
   - target:
       group: apps
