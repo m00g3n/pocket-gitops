@@ -3,3 +3,4 @@ kubeconfig.yaml
 kustomize/base/flux.yaml
 kustomize/k3s/coredns.patch.yaml
 kustomize/k3s/flux-ssh-config.yaml
+kustomize/k3s/configs/ssh-config

@@ -4,6 +4,9 @@ metadata:
   name: flux
   namespace: flux
 spec:
+  selector:
+    matchLabels:
+      name: flux
   template:
     spec:
       volumes:

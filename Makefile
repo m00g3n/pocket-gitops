@@ -14,27 +14,14 @@ ${COREDNS_PATCH_YAML}:
 
 NAMESPACE := 'flux'
 HOST := 'gitea'
-FLUX_SSH_CONFIG_YAML := ${K3S}/flux-ssh-config.yaml
+FLUX_SSH_FILE := ${K3S}/configs/ssh-config
 
-${FLUX_SSH_CONFIG_YAML}:
-	$(eval tmpfile=$(shell mktemp /tmp/known_hosts.XXXXXX))
-	exec 3>"$tmpfile"
-
+${FLUX_SSH_FILE}:
 	docker run -i -t --rm \
 	--network=hyc-demo \
 	kroniak/ssh-client \
 	ssh-keyscan ${HOST} \
-	> $tmpfile
-
-	kubectl create configmap flux-ssh-config \
-	-n ${NAMESPACE} \
-	--from-file=known_hosts=$tmpfile \
-	-oyaml \
-	--dry-run \
-	--save-config \
-	> ${K3S}/flux-ssh-config.yaml
-
-	rm "$tmpfile"
+	> ${FLUX_SSH_FILE}
 
 FLUX_YAML := ${BASE}/flux.yaml
 
@@ -45,16 +32,16 @@ ${FLUX_YAML}:
 	--git-url=git@gitea:hyc-gitops/dywan.git \
 	--namespace=flux > ${FLUX_YAML}
 
-generate: ${COREDNS_PATCH_YAML} ${FLUX_SSH_CONFIG_YAML} ${FLUX_YAML};
+generate: ${COREDNS_PATCH_YAML} ${FLUX_SSH_FILE} ${FLUX_YAML};
 
 apply-k3s: generate
 	kubectl config use-context default --kubeconfig='kubeconfig.yaml'
-	kubectl apply -k ${K3S}
+	kustomize build ${K3S} | kubectl apply -f -
 	kubectl -n flux rollout status deployment/flux
 
-clean-apply-k3s: clean apply-k3s;
-
 clean:
-	rm -f ${COREDNS_PATCH_YAML} ${FLUX_SSH_CONFIG_YAML} ${FLUX_YAML}
+	rm -f ${COREDNS_PATCH_YAML} ${FLUX_SSH_FILE} ${FLUX_YAML}
 
-.PHONY: apply-k3s clean clean-apply-k38s
+all: clean apply-k3s;
+
+.PHONY: apply-k3s clean all
