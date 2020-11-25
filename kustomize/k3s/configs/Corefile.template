@@ -1,0 +1,30 @@
+gitea:53 {
+    hosts {
+        __GITEA_IP_ADDRESS__ gitea
+    }
+}
+registry:53 {
+    hosts {
+        __REGISTRY_IP_ADDRESS__ registry
+    }
+}
+.:53 {
+    errors
+    health
+    ready
+    kubernetes cluster.local in-addr.arpa ip6.arpa {
+      pods insecure
+      upstream
+      fallthrough in-addr.arpa ip6.arpa
+    }
+    hosts /etc/coredns/NodeHosts {
+      reload 1s
+      fallthrough
+    }
+    prometheus :9153
+    forward . /etc/resolv.conf
+    cache 30
+    loop
+    reload
+    loadbalance
+}
