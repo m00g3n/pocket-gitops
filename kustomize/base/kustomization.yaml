@@ -1,5 +1,3 @@
 resources:
 - flux.yaml
-- coredns.patch.yaml
 - ns.yaml
-- flux-ssh-config.yaml
