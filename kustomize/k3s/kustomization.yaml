@@ -1,6 +1,9 @@
 bases:
   - ../base
 
+patches:
+  - flux-ssh-config-patch.yaml
+
 resources:
   - coredns.patch.yaml
   - flux-ssh-config.yaml
