@@ -61,6 +61,8 @@ services:
       - /run
       - /var/run
     privileged: true
+    volumes:
+      - ./registries.yaml:/etc/rancher/k3s/registries.yaml
     networks:
       - hyc-demo
     environment:

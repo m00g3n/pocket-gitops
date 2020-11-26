@@ -8,6 +8,8 @@ This repository contains...
 - docker-compose
 - kubectl
 - make
+- kustomize
+- fluxctl
 
 ## Clone this repository
 
