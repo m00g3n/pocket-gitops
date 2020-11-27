@@ -4,3 +4,6 @@ kustomize/base/flux.yaml
 kustomize/k3s/coredns.patch.yaml
 kustomize/k3s/flux-ssh-config.yaml
 kustomize/k3s/configs/ssh-config
+backup
+kustomize/k3s/configs/known_hosts
+kustomize/k3s/configs/Corefile
