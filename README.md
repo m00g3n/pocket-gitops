@@ -1,6 +1,6 @@
 # Pocket GitOps
 
-This repository contains...
+This repository contains a simple local environment setup to experiment with GitOps. 
 
 ## Prerequesites
 
@@ -14,13 +14,14 @@ This repository contains...
 ## Clone this repository
 
 ```bash
-git clone https://...
+git clone https://github.com/m00g3n/pocket-gitops.git 
+cd pocket-gitops.git 
 ```
 
 ## Starting cluster
 
 ```bash
-K3S_TOKEN=${RANDOM}${RANDOM}${RANDOM} docker-compose up
+k3s_token=${random}${random}${random} docker-compose up
 ```
 
 Wait until k8s is up and running.
@@ -28,7 +29,11 @@ Wait until k8s is up and running.
 ## Provision cluster
 
 ```bash
-make clean-apply-k3s
+make all GIT_USER=<flux-service-account> GIT_EMAIL=<email> GIT_URL=<git-repository>
 ```
 
 ## Shutting down the cluster
+
+```bash
+k3s_token=${random}${random}${random} docker-compose down
+```
