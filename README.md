@@ -25,6 +25,7 @@ K3S_TOKEN=${RANDOM}${RANDOM}${RANDOM} docker-compose up -d
 ```
 
 Wait until k8s is up and running.
+Than create an organization and repository in Gitea.
 
 ## Provision cluster
 
