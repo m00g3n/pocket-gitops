@@ -15,13 +15,13 @@ This repository contains a simple local environment setup to experiment with Git
 
 ```bash
 git clone https://github.com/m00g3n/pocket-gitops.git 
-cd pocket-gitops.git 
+cd pocket-gitops
 ```
 
 ## Starting cluster
 
 ```bash
-k3s_token=${random}${random}${random} docker-compose up
+K3S_TOKEN=${RANDOM}${RANDOM}${RANDOM} docker-compose up -d
 ```
 
 Wait until k8s is up and running.
@@ -29,11 +29,12 @@ Wait until k8s is up and running.
 ## Provision cluster
 
 ```bash
+export KUBECONFIG=./kubeconfig.yaml
 make all GIT_USER=<flux-service-account> GIT_EMAIL=<email> GIT_URL=<git-repository>
 ```
 
 ## Shutting down the cluster
 
 ```bash
-k3s_token=${random}${random}${random} docker-compose down
+K3S_TOKEN=${RANDOM}${RANDOM}${RANDOM} docker-compose down
 ```
