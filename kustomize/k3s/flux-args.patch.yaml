@@ -17,9 +17,6 @@
     configMap:
       name: flux-ssh-config
 - op: add
-  path: /spec/template/spec/containers/0/args/-
-  value: --docker-config=""
-- op: add
   path: /spec/template/spec/containers/0/volumeMounts/-
   value:
     name: ssh-config

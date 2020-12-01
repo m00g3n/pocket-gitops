@@ -27,9 +27,9 @@ FLUX_YAML := ${BASE}/flux.yaml
 
 ${FLUX_YAML}:
 	fluxctl install \
-	--git-user=admin123 \
-	--git-email=me@test.you \
-	--git-url=git@gitea:hyc-gitops/dywan.git \
+	--git-user=${GIT_USER} \
+	--git-email=${GIT_EMAIL} \
+	--git-url=${GIT_URL} \
 	--namespace=flux > ${FLUX_YAML}
 
 generate: ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML};
