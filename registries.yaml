@@ -1,6 +1,6 @@
 mirrors:
-  registry:5000:
+  registry:5001:
     endpoint:
-    - http://registry:5000
+    - http://registry:5001
   configs: {}
   auths: {}

@@ -39,6 +39,10 @@ apply-k3s: generate
 	kustomize build ${K3S} | kubectl apply -f -
 	kubectl -n flux rollout status deployment/flux
 
+apply-k8s: ${FLUX_YAML}
+	kustomize build ${BASE} | kubectl apply -f -
+	kubectl -n flux rollout status deployment/flux
+
 clean:
 	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML}
 
