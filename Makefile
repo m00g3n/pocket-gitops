@@ -1,6 +1,12 @@
 ROOT := $(shell pwd)
 BASE := ${ROOT}/kustomize/base
 K3S := ${ROOT}/kustomize/k3s
+CLOUD := ${ROOT}/kustomize/cloud
+GITEA := ${ROOT}/kustomize/gitea
+
+GIT_USER ?= flux-bot
+GIT_EMAIL ?= flux@hyc.com
+GIT_URL ?= git@gitea.gitea.svc.cluster.local:HYC/infrastructure.git
 
 DOCKER_IP_ADDR_TPL='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
 GITEA_IP_ADDRESS=$(shell docker inspect -f ${DOCKER_IP_ADDR_TPL} /gitea)
@@ -22,6 +28,12 @@ ${FLUX_KNOWN_HOSTS}:
 	kroniak/ssh-client \
 	ssh-keyscan ${HOST} \
 	> ${FLUX_KNOWN_HOSTS}
+
+FLUX_KNOWN_HOSTS_CLOUD := ${CLOUD}/configs/known_hosts
+
+${FLUX_KNOWN_HOSTS_CLOUD}:
+	mkdir -p ${CLOUD}/configs
+	${ROOT}/hack/ssh_keyscan.sh > ${FLUX_KNOWN_HOSTS_CLOUD}
 
 FLUX_YAML := ${BASE}/flux.yaml
 
@@ -46,17 +58,23 @@ start-k3d:
 		--registry-create=k3d-hyc-registry.localhost:5001 \
 		--wait
 
-generate: clean ${FLUX_KNOWN_HOSTS} ${FLUX_YAML}; 
-
-apply-k3s-flux: generate
+apply-k3s-flux: clean ${FLUX_KNOWN_HOSTS} ${FLUX_YAML}
 	@kustomize build ${K3S} | kubectl apply -f -
 	@kubectl -n flux rollout status deployment/flux
 
-apply-k8s: ${FLUX_YAML}
-	kustomize build ${BASE} | kubectl apply -f -
+apply-k8s-gitea:
+	kustomize build ${GITEA} | kubectl apply -f -
+	kubectl -n gitea rollout status deployment/gitea
+	@${ROOT}/hack/updateHosts.sh gitea gitea gitea.hyc.com
+
+apply-k8s-flux: clean ${FLUX_KNOWN_HOSTS_CLOUD} ${FLUX_YAML}
+	@${ROOT}/hack/createGitUser.sh ${GIT_PASSWD}
+	kustomize build ${CLOUD}  | kubectl apply -f -
 	kubectl -n flux rollout status deployment/flux
-
+	
 clean:
-	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML} || true
+	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_KNOWN_HOSTS_CLOUD} ${FLUX_YAML}
 
-.PHONY: apply-k3s-flux apply-k8s clean
+all: clean apply-k3s;
+
+.PHONY: apply-k8s-gitea apply-k8s-flux apply-k3s clean all

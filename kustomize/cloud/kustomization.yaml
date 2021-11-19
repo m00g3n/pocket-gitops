@@ -1,0 +1,21 @@
+bases:
+  - ../base
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: flux
+      namespace: flux
+    path: flux-args.patch.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: flux-ssh-config
+    namespace: flux
+    behavior: create
+    files:
+      - configs/known_hosts

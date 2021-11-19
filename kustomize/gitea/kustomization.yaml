@@ -1,0 +1,5 @@
+resources:
+- gitea.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
