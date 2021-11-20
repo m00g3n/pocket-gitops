@@ -1,6 +1,7 @@
 ROOT := $(shell pwd)
 BASE := ${ROOT}/kustomize/base
 K3S := ${ROOT}/kustomize/k3s
+K3D := ${ROOT}/kustomize/k3d
 
 DOCKER_IP_ADDR_TPL='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
 GITEA_IP_ADDRESS=$(shell docker inspect -f ${DOCKER_IP_ADDR_TPL} /gitea)
@@ -25,6 +26,10 @@ ${FLUX_KNOWN_HOSTS}:
 
 FLUX_YAML := ${BASE}/flux.yaml
 
+GIT_USER=hycadmin
+GIT_EMAIL=hycadmin@sap.com
+GIT_URL=http://localhost:3000
+
 ${FLUX_YAML}:
 	fluxctl install \
 	--git-user=${GIT_USER} \
@@ -34,6 +39,25 @@ ${FLUX_YAML}:
 
 generate: ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML};
 
+.PHONY: compose-up
+compose-up:
+	docker-compose -f docker-compose.yaml up -d
+	./wait-for-it.sh localhost:222
+	./wait-for-it.sh localhost:3000
+	./wait-for-it.sh localhost:5001
+
+.PHONY: run
+run: compose-up generate
+	k3d cluster create --network=hyc-demo --registry-config=registries.yaml --wait
+	kustomize build ${K3S} | kubectl apply -f -
+	kubectl -n flux rollout status deployment/flux
+
+.PHONY: stop
+stop:
+	k3d cluster delete
+	docker-compose -f docker-compose_test.yaml down
+
+# to be removed
 apply-k3s: generate
 	kubectl config use-context default --kubeconfig='kubeconfig.yaml'
 	kustomize build ${K3S} | kubectl apply -f -

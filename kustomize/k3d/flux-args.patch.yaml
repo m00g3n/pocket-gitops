@@ -1,0 +1,23 @@
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --sync-garbage-collection
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --git-poll-interval=30s
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --sync-interval=1m
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --git-path=infrastructure
+- op: add
+  path: /spec/template/spec/volumes/-
+  value:
+    name: ssh-config
+    configMap:
+      name: flux-ssh-config
+- op: add
+  path: /spec/template/spec/containers/0/volumeMounts/-
+  value:
+    name: ssh-config
+    mountPath: /root/.ssh
