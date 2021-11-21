@@ -1,7 +1,6 @@
 ROOT := $(shell pwd)
 BASE := ${ROOT}/kustomize/base
 K3S := ${ROOT}/kustomize/k3s
-K3D := ${ROOT}/kustomize/k3d
 
 DOCKER_IP_ADDR_TPL='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
 GITEA_IP_ADDRESS=$(shell docker inspect -f ${DOCKER_IP_ADDR_TPL} /gitea)
@@ -10,7 +9,7 @@ REGISTRY_IP_ADDRESS=$(shell docker inspect -f ${DOCKER_IP_ADDR_TPL} /registry)
 COREDNS_COREFILE := ${K3S}/configs/Corefile
 
 ${COREDNS_COREFILE}:
-	sed "s/__GITEA_IP_ADDRESS__/${GITEA_IP_ADDRESS}/; s/__REGISTRY_IP_ADDRESS__/${REGISTRY_IP_ADDRESS}/" \
+	sed "s/__GITEA_IP_ADDRESS__/${GITEA_IP_ADDRESS}/" \
 	${K3S}/configs/Corefile.template > ${COREDNS_COREFILE}
 
 NAMESPACE := 'flux'
@@ -19,16 +18,16 @@ FLUX_KNOWN_HOSTS := ${K3S}/configs/known_hosts
 
 ${FLUX_KNOWN_HOSTS}:
 	docker run -i -t --rm \
-	--network=hyc-demo \
+	--network=hyc \
 	kroniak/ssh-client \
 	ssh-keyscan ${HOST} \
 	> ${FLUX_KNOWN_HOSTS}
 
 FLUX_YAML := ${BASE}/flux.yaml
 
-GIT_USER=hycadmin
-GIT_EMAIL=hycadmin@sap.com
-GIT_URL=http://localhost:3000
+GIT_USER=hyc-bot
+GIT_EMAIL=hyc-bot@hyc.com
+GIT_URL=git@gitea:HYC/hyctestk3s.git
 
 ${FLUX_YAML}:
 	fluxctl install \
@@ -37,39 +36,36 @@ ${FLUX_YAML}:
 	--git-url=${GIT_URL} \
 	--namespace=flux > ${FLUX_YAML}
 
-generate: ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML};
+start-k3d:
+	@k3d cluster create hyc \
+		--network=hyc \
+		--registry-create=k3d-hyc-registry.localhost:5001
+		--wait
 
-.PHONY: compose-up
-compose-up:
-	docker-compose -f docker-compose.yaml up -d
-	./wait-for-it.sh localhost:222
-	./wait-for-it.sh localhost:3000
-	./wait-for-it.sh localhost:5001
+start-gitea:
+	@docker run \
+		-d \
+		--name gitea \
+		--env USER_UID=1000 \
+		--env USER_GID=1000 \
+		--restart=always \
+		--volume gitea:/data \
+		--volume /etc/timezone:/etc/timezone:ro \
+		--volume /etc/localtime:/etc/localtime:ro \
+		--network=hyc \
+		-p 3000:3000 \
+		-p 222:22 \
+		gitea/gitea:1.12.6
 
-.PHONY: run
-run: compose-up generate
-	k3d cluster create --network=hyc-demo --registry-config=registries.yaml --wait
-	kustomize build ${K3S} | kubectl apply -f -
-	kubectl -n flux rollout status deployment/flux
-
-.PHONY: stop
-stop:
-	k3d cluster delete
-	docker-compose -f docker-compose_test.yaml down
-
-# to be removed
-apply-k3s: generate
-	kubectl config use-context default --kubeconfig='kubeconfig.yaml'
-	kustomize build ${K3S} | kubectl apply -f -
-	kubectl -n flux rollout status deployment/flux
+apply-k3s-flux: clean ${FLUX_KNOWN_HOSTS} ${COREDNS_COREFILE} ${FLUX_YAML};
+	@kustomize build ${K3S} | kubectl apply -f -
+	@kubectl -n flux rollout status deployment/flux
 
 apply-k8s: ${FLUX_YAML}
 	kustomize build ${BASE} | kubectl apply -f -
 	kubectl -n flux rollout status deployment/flux
 
 clean:
-	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML}
+	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_YAML} || true
 
-all: clean apply-k3s;
-
-.PHONY: apply-k3s clean all
+.PHONY: apply-k3s-flux apply-k8s clean

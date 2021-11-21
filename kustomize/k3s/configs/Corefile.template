@@ -3,11 +3,6 @@ gitea:53 {
         __GITEA_IP_ADDRESS__ gitea
     }
 }
-registry:53 {
-    hosts {
-        __REGISTRY_IP_ADDRESS__ registry
-    }
-}
 .:53 {
     errors
     health
