@@ -17,7 +17,7 @@ HOST := 'gitea'
 FLUX_KNOWN_HOSTS := ${K3S}/configs/known_hosts
 
 ${FLUX_KNOWN_HOSTS}:
-	docker run -i -t --rm \
+	@docker run -i -t --rm \
 	--network=hyc \
 	kroniak/ssh-client \
 	ssh-keyscan ${HOST} \
@@ -28,36 +28,26 @@ FLUX_YAML := ${BASE}/flux.yaml
 GIT_USER=hyc-bot
 GIT_EMAIL=hyc-bot@hyc.com
 GIT_URL=git@gitea:HYC/hyctestk3s.git
+GIT_BRANCH=main
+GIT_PATH=resources/
 
 ${FLUX_YAML}:
-	fluxctl install \
+	@fluxctl install \
 	--git-user=${GIT_USER} \
 	--git-email=${GIT_EMAIL} \
 	--git-url=${GIT_URL} \
+	--git-branch=${GIT_BRANCH} \
 	--namespace=flux > ${FLUX_YAML}
 
 start-k3d:
 	@k3d cluster create hyc \
 		--network=hyc \
-		--registry-create=k3d-hyc-registry.localhost:5001
+		--registry-create=k3d-hyc-registry.localhost:5001 \
 		--wait
 
-start-gitea:
-	@docker run \
-		-d \
-		--name gitea \
-		--env USER_UID=1000 \
-		--env USER_GID=1000 \
-		--restart=always \
-		--volume gitea:/data \
-		--volume /etc/timezone:/etc/timezone:ro \
-		--volume /etc/localtime:/etc/localtime:ro \
-		--network=hyc \
-		-p 3000:3000 \
-		-p 222:22 \
-		gitea/gitea:1.12.6
+generate: clean ${FLUX_KNOWN_HOSTS} ${FLUX_YAML}; 
 
-apply-k3s-flux: clean ${FLUX_KNOWN_HOSTS} ${COREDNS_COREFILE} ${FLUX_YAML};
+apply-k3s-flux: generate
 	@kustomize build ${K3S} | kubectl apply -f -
 	@kubectl -n flux rollout status deployment/flux
 

@@ -1,13 +1,3 @@
 resources:
 - flux.yaml
 - ns.yaml
-
-generatorOptions:
-  disableNameSuffixHash: true
-
-configMapGenerator:
-  - name: flux-ssh-config
-    namespace: flux
-    behavior: create
-    files:
-      - configs/known_hosts

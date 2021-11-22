@@ -14,8 +14,9 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-  - name: coredns
-    namespace: kube-system
+  - name: flux-ssh-config
+    namespace: flux
     behavior: create
     files:
-      - configs/Corefile
+      - configs/known_hosts
+
