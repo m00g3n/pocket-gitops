@@ -20,6 +20,7 @@ HOST := 'gitea'
 FLUX_KNOWN_HOSTS := ${K3S}/configs/known_hosts
 
 ${FLUX_KNOWN_HOSTS}:
+	mkdir -p ${K3S}/configs
 	@docker run -i -t --rm \
 	--network=hyc \
 	kroniak/ssh-client \
