@@ -1,3 +1,12 @@
+- op: replace
+  path: /spec/template/spec/containers/0/args/2
+  value: --git-url=git@gitea.gitea.svc.cluster.local:HYC/infrastructure.git
+- op: replace
+  path: /spec/template/spec/containers/0/args/3
+  value: --git-branch=master
+- op: replace
+  path: /spec/template/spec/containers/0/args/6
+  value: --git-email=flux@hyc.com
 - op: add
   path: /spec/template/spec/containers/0/args/-
   value: --sync-garbage-collection
@@ -10,6 +19,9 @@
 - op: add
   path: /spec/template/spec/containers/0/args/-
   value: --git-path=infrastructure
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --git-user=flux-bot
 - op: add
   path: /spec/template/spec/volumes/-
   value:

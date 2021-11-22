@@ -7,4 +7,4 @@ kustomize/k3s/configs/ssh-config
 backup
 kustomize/k3s/configs/known_hosts
 kustomize/k3s/configs/Corefile
-kustomize/cloud/configs/known_hosts
+kustomize/k8s/configs/known_hosts

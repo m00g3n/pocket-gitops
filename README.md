@@ -76,7 +76,7 @@ make apply-k8s-flux
 
 ### Update SSH key
 
-1. Run following command in the shell and coppy the whole output:
+1. Run following command in the shell and copy the whole output:
 
     ```bash
     fluxctl identity --k8s-fwd-ns flux

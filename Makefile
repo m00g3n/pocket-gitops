@@ -1,12 +1,9 @@
 ROOT := $(shell pwd)
 BASE := ${ROOT}/kustomize/base
 K3S := ${ROOT}/kustomize/k3s
-CLOUD := ${ROOT}/kustomize/cloud
+K8S := ${ROOT}/kustomize/k8s
 GITEA := ${ROOT}/kustomize/gitea
 
-GIT_USER ?= flux-bot
-GIT_EMAIL ?= flux@hyc.com
-GIT_URL ?= git@gitea.gitea.svc.cluster.local:HYC/infrastructure.git
 
 DOCKER_IP_ADDR_TPL='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
 GITEA_IP_ADDRESS=$(shell docker inspect -f ${DOCKER_IP_ADDR_TPL} /gitea)
@@ -29,27 +26,18 @@ ${FLUX_KNOWN_HOSTS}:
 	ssh-keyscan ${HOST} \
 	> ${FLUX_KNOWN_HOSTS}
 
-FLUX_KNOWN_HOSTS_CLOUD := ${CLOUD}/configs/known_hosts
+FLUX_KNOWN_HOSTS_K8S := ${K8S}/configs/known_hosts
 
-${FLUX_KNOWN_HOSTS_CLOUD}:
-	mkdir -p ${CLOUD}/configs
-	${ROOT}/hack/ssh_keyscan.sh > ${FLUX_KNOWN_HOSTS_CLOUD}
+${FLUX_KNOWN_HOSTS_K8S}:
+	mkdir -p ${K8S}/configs
+	${ROOT}/hack/ssh_keyscan.sh > ${FLUX_KNOWN_HOSTS_K8S}
 
 FLUX_YAML := ${BASE}/flux.yaml
 
-GIT_USER=hyc-bot
-GIT_EMAIL=hyc-bot@hyc.com
-GIT_URL=git@gitea:HYC/hyctestk3s.git
-GIT_BRANCH=main
-GIT_PATH=resources/
-
 ${FLUX_YAML}:
 	@fluxctl install \
-	--git-user=${GIT_USER} \
-	--git-email=${GIT_EMAIL} \
-	--git-url=${GIT_URL} \
-	--git-branch=${GIT_BRANCH} \
-	--git-path=${GIT_PATH} \
+	--git-url="git@gitea:HYC/hyctestk3s.git" \
+	--git-email="hyc-bot@hyc.com" \
 	--namespace=flux > ${FLUX_YAML}
 
 start-k3d:
@@ -67,13 +55,13 @@ apply-k8s-gitea:
 	kubectl -n gitea rollout status deployment/gitea
 	@${ROOT}/hack/updateHosts.sh gitea gitea gitea.hyc.com
 
-apply-k8s-flux: clean ${FLUX_KNOWN_HOSTS_CLOUD} ${FLUX_YAML}
+apply-k8s-flux: clean ${FLUX_KNOWN_HOSTS_K8S} ${FLUX_YAML}
 	@${ROOT}/hack/createGitUser.sh ${GIT_PASSWD}
-	kustomize build ${CLOUD}  | kubectl apply -f -
+	kustomize build ${K8S}  | kubectl apply -f -
 	kubectl -n flux rollout status deployment/flux
 	
 clean:
-	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_KNOWN_HOSTS_CLOUD} ${FLUX_YAML}
+	rm -f ${COREDNS_COREFILE} ${FLUX_KNOWN_HOSTS} ${FLUX_KNOWN_HOSTS_K8S} ${FLUX_YAML}
 
 all: clean apply-k3s;
 

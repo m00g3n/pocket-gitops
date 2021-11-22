@@ -1,3 +1,12 @@
+- op: replace
+  path: /spec/template/spec/containers/0/args/2
+  value: --git-url=git@gitea:HYC/hyctestk3s.git
+- op: replace
+  path: /spec/template/spec/containers/0/args/3
+  value: --git-branch=main
+- op: replace
+  path: /spec/template/spec/containers/0/args/6
+  value: --git-email=hyc-bot@hyc.com
 - op: add
   path: /spec/template/spec/containers/0/args/-
   value: --sync-garbage-collection
@@ -7,6 +16,12 @@
 - op: add
   path: /spec/template/spec/containers/0/args/-
   value: --sync-interval=1m
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --git-path=resources
+- op: add
+  path: /spec/template/spec/containers/0/args/-
+  value: --git-user=hyc-bot
 - op: add
   path: /spec/template/spec/volumes/-
   value:
