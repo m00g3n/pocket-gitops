@@ -8,9 +8,6 @@
   path: /spec/template/spec/containers/0/args/-
   value: --sync-interval=1m
 - op: add
-  path: /spec/template/spec/containers/0/args/-
-  value: --git-path=resources
-- op: add
   path: /spec/template/spec/volumes/-
   value:
     name: ssh-config

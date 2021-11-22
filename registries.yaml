@@ -1,6 +1,0 @@
-mirrors:
-  registry:5001:
-    endpoint:
-    - http://registry:5001
-  configs: {}
-  auths: {}

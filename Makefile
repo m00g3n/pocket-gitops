@@ -37,6 +37,7 @@ ${FLUX_YAML}:
 	--git-email=${GIT_EMAIL} \
 	--git-url=${GIT_URL} \
 	--git-branch=${GIT_BRANCH} \
+	--git-path=${GIT_PATH} \
 	--namespace=flux > ${FLUX_YAML}
 
 start-k3d:
